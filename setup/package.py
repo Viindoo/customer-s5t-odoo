@@ -382,6 +382,7 @@ class KVM(object):
         self.image = args.vm_winxp_image
         self.ssh_key = args.vm_winxp_ssh_key
         self.login = args.vm_winxp_login
+        self.pg_password = args.pg_password
 
     def timeout(self, signum, frame):
         logging.warning("vm timeout kill (pid: {})".format(self.kvm_proc.pid))
@@ -476,7 +477,7 @@ class KVMWinTestExe(KVM):
 
         self.rsync(['%s' % setup_path, '%s@127.0.0.1:' % self.login])
         self.ssh("TEMP=/tmp ./%s /S" % setupfile)
-        self.ssh('PGPASSWORD=openpgpwd /cygdrive/c/"Program Files"/"Odoo %s"/PostgreSQL/bin/createdb.exe -e -U openpg mycompany' % setupversion)
+        self.ssh('PGPASSWORD=%s /cygdrive/c/"Program Files"/"Odoo %s"/PostgreSQL/bin/createdb.exe -e -U openpg mycompany' % (self.pg_password, setupversion))
         self.ssh('netsh advfirewall set publicprofile state off')
         self.ssh('/cygdrive/c/"Program Files"/"Odoo {sv}"/python/python.exe \'c:\\Program Files\\Odoo {sv}\\server\\odoo-bin\' -d mycompany -i base --stop-after-init'.format(sv=setupversion))
         _rpc_count_modules(port=18069)
@@ -510,6 +511,7 @@ def parse_args():
     ap.add_argument("--vm-winxp-login", default='Naresh', help="Windows login %(default)s")
     ap.add_argument("--vm-winxp-python-version", default='3.7.7', help="Windows Python version installed in the VM (default: %(default)s)")
 
+    ap.add_argument("--pg-password", default='openpgpwd', help="The PGPASSWORD")
     ap.add_argument("-t", "--test", action="store_true", default=False, help="Test built packages")
     ap.add_argument("-s", "--sign", action="store_true", default=False, help="Sign Debian package / generate Rpm repo")
     ap.add_argument("--no-remove", action="store_true", help="don't remove build dir")

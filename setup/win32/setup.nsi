@@ -80,6 +80,7 @@ Unicode True
 
 !define REGISTRY_KEY "SOFTWARE\${DISPLAY_NAME}"
 
+!define DEFAULT_POSTGRESQL_SERVICE_PASSWORD '0p3npgsvcPWD'
 !define DEFAULT_POSTGRESQL_HOSTNAME 'localhost'
 !define DEFAULT_POSTGRESQL_PORT 5432
 !define DEFAULT_POSTGRESQL_USERNAME 'openpg'
@@ -102,6 +103,7 @@ Var Option_AllInOne
 Var HasPostgreSQL
 Var cmdLineParams
 
+Var TextPostgreSQLServicePassword
 Var TextPostgreSQLHostname
 Var TextPostgreSQLPort
 Var TextPostgreSQLUsername
@@ -301,7 +303,7 @@ Section $(TITLE_PostgreSQL) SectionPostgreSQL
         --prefix "$INSTDIR\PostgreSQL" \
         --datadir "$INSTDIR\PostgreSQL\data" \
         --servicename "PostgreSQL_For_Odoo" \
-        --serviceaccount "openpgsvc" --servicepassword "0p3npgsvcPWD" \
+        --serviceaccount "openpgsvc" --servicepassword "$TextPostgreSQLServicePassword" \
         --superaccount "$TextPostgreSQLUsername" --superpassword "$TextPostgreSQLPassword" \
         --serverport $TextPostgreSQLPort'
 SectionEnd
@@ -379,6 +381,7 @@ Function .onInit
     StrCpy $Option_AllInOne 0
     StrCpy $HasPostgreSQL 0
 
+    StrCpy $TextPostgreSQLServicePassword ${DEFAULT_POSTGRESQL_SERVICE_PASSWORD}
     StrCpy $TextPostgreSQLHostname ${DEFAULT_POSTGRESQL_HOSTNAME}
     StrCpy $TextPostgreSQLPort ${DEFAULT_POSTGRESQL_PORT}
     StrCpy $TextPostgreSQLUsername ${DEFAULT_POSTGRESQL_USERNAME}
