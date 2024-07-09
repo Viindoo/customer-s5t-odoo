@@ -668,8 +668,10 @@ class JsonRequest(WebRequest):
             error = {
                 'code': 200,
                 'message': "Odoo Server Error",
-                'data': serialize_exception(exception),
+                'data': exception.args and (exception.args[0] or ''),
             }
+            if getattr(threading.current_thread(), 'testing', False):
+                error['data'] = serialize_exception(exception)
             if isinstance(exception, werkzeug.exceptions.NotFound):
                 error['http_status'] = 404
                 error['code'] = 404
