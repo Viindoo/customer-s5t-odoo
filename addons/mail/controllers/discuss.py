@@ -13,9 +13,12 @@ from odoo.http import request
 from odoo.tools import consteq, file_open
 from odoo.tools.misc import get_lang
 from odoo.tools.translate import _
+from odoo.tools.mimetypes import get_extension
 from werkzeug.exceptions import NotFound
 
-DEFAULT_BLACKLIST_FILE_TYPE = ['text/html', 'text/javascript']
+DEFAULT_WHITELIST_FILE_TYPE = [
+    '.doc', '.docx', '.docs', '.pdf', '.png', '.jepg', '.webp', '.txt', '.csv', '.ppt', '.pptx', '.xml', '.xls', '.xlsx', '.mp3', '.mp4'
+]
 
 
 class DiscussController(http.Controller):
@@ -240,13 +243,14 @@ class DiscussController(http.Controller):
     @http.route('/mail/attachment/upload', methods=['POST'], type='http', auth='public')
     def mail_attachment_upload(self, ufile, thread_id, thread_model, is_pending=False, **kwargs):
         # BEGIN OVERIDE
-        blacklist_file_types = request.env['ir.config_parameter'].sudo().get_param(
-            'mail.blacklist_file_types',
-            default=DEFAULT_BLACKLIST_FILE_TYPE)
-        if isinstance(blacklist_file_types, str):
-            blacklist_file_types = blacklist_file_types.split(',')
+        whitelist_file_types = request.env['ir.config_parameter'].sudo().get_param(
+            'mail.whitelist_file_types',
+            default=DEFAULT_WHITELIST_FILE_TYPE)
+        if isinstance(whitelist_file_types, str):
+            whitelist_file_types = whitelist_file_types.split(',')
         # TODO: create a module if making pr for odoo not working
-        if any(blacklist_type in ufile.mimetype for blacklist_type in blacklist_file_types):
+        file_extension = get_extension(ufile.filename)
+        if not any(whitelist_type == file_extension for whitelist_type in whitelist_file_types):
             attachmentData = {'error': _("You are not allowed to upload attachment with extension %s here.", ufile.mimetype)}
             return request.make_response(
                 data=json.dumps(attachmentData),
